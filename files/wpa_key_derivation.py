@@ -60,7 +60,9 @@ SNonce = raw(wpa[6])[65:-72]
 mic_to_test = "36eef66540fa801ceee2fea9b7929b40"
 
 B           = min(APmac,Clientmac)+max(APmac,Clientmac)+min(ANonce,SNonce)+max(ANonce,SNonce) #used in pseudo-random function
-
+data_from_capture = wpa[9]
+print(data_from_capture)
+exit()
 data        = a2b_hex("0103005f02030a0000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") #cf "Quelques détails importants" dans la donnée
 
 print ("\n\nValues used to derivate keys")
